@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cluster-E | CSE (AIML) Timetable</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --card: #1a1a22;
+    --text: #f1f1f5;
+    --muted: #a0a0b0;
+    --accent: #7c5cff;
+    --orange: #ff9f43;      /* Matrices & Diff Calculus */
+    --yellow: #feca57;      /* Environmental Chemistry */
+    --blue: #54a0ff;        /* Digital Logic Design */
+    --purple: #5f27cd;      /* Basic Electrical Engg */
+    --cyan: #00d2d3;        /* Computer Programming */
+    --green: #1dd1a1;       /* Communication Skills */
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 40px;
+    overflow-x: hidden;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #1a1a22, #12121a);
+    padding: 20px 16px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid #2a2a35;
+    backdrop-filter: blur(12px);
+  }
+  .header h1 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .header p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-left: 8px;
+  }
+
+  .days {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 14px 16px 6px;
+    scrollbar-width: none;
+  }
+  .days::-webkit-scrollbar { display: none; }
+  .day-btn {
+    flex: 0 0 auto;
+    padding: 10px 18px;
+    border-radius: 30px;
+    background: #22222c;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  .day-btn.active {
+    background: var(--accent);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 20px rgba(124,92,255,0.4);
+  }
+
+  .timeline { padding: 8px 16px 30px; }
+  .slot {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 18px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideUp 0.5s ease forwards;
+  }
+  @keyframes slideUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .time {
+    width: 72px;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    padding-top: 14px;
+    text-align: right;
+  }
+  .card {
+    flex: 1;
+    background: var(--card);
+    border-radius: 18px;
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #2a2a35;
+    transition: transform 0.25s ease;
+  }
+  .card:active { transform: scale(0.98); }
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 5px;
+  }
+  .card.mdc::before { background: var(--orange); }
+  .card.ec::before  { background: var(--yellow); }
+  .card.dld::before { background: var(--blue); }
+  .card.bee::before { background: var(--purple); }
+  .card.cs::before  { background: var(--cyan); }
+  .card.cp::before  { background: var(--green); }
+  .card.lib::before { background: #636e72; }
+
+  .subj {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .teacher {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: #2a2a35;
+    color: #ccc;
+  }
+  .tag.lab { background: #3d2a5a; color: #d0bfff; }
+  .tag.theory { background: #1e3a5f; color: #7eb8ff; }
+
+  .free {
+    background: #1a1a22;
+    border: 1px dashed #333;
+    color: var(--muted);
+    text-align: center;
+    padding: 18px;
+    font-size: 0.9rem;
+  }
+
+  .legend {
+    margin: 10px 16px 30px;
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid #2a2a35;
+  }
+  .legend h3 {
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+    color: var(--muted);
+  }
+  .leg-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 0.82rem;
+  }
+  .dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .day-content { display: none; }
+  .day-content.active { display: block; }
+
+  .tip {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #555;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Cluster-E <span class="badge">CSE (AIML)</span></h1>
+  <p>Master Timetable • Full forms + Teachers</p>
+</div>
+
+<div class="days" id="dayTabs">
+  <button class="day-btn active" data-day="mon">Mon</button>
+  <button class="day-btn" data-day="tue">Tue</button>
+  <button class="day-btn" data-day="wed">Wed</button>
+  <button class="day-btn" data-day="thu">Thu</button>
+  <button class="day-btn" data-day="fri">Fri</button>
+</div>
+
+<!-- ==================== MONDAY ==================== -->
+<div class="day-content active" id="mon">
+  <div class="timeline">
+    <div class="slot" style="animation-delay:0.05s">
+      <div class="time">09:45<br>10:45</div>
+      <div class="card dld">
+        <div class="subj">Digital Logic Design</div>
+        <div class="teacher">Prof. Ranjit Wagh (RW)</div>
+        <div class="meta"><span class="tag theory">Theory • C-301</span></div>
+      </div>
+    </div>
+    <div class="slot" style="animation-delay:0.1s">
+      <div class="time">10:45<br>11:45</div>
+      <div class="card lib">
+        <div class="subj">Library</div>
+        <div class="teacher">Self Study / Free</div>
+        <div class="meta"><span class="tag">Free Slot</span></div>
+      </div>
+    </div>
+    <div class="slot" style="animation-delay:0.15s">
+      <div class="time">11:45<br>12:45</div>
+      <div class="card mdc">
+        <div class="subj">Matrices & Differential Calculus</div>
+        <div class="teacher">Prof. Aabid Khan (AK)</div>
+        <div class="meta"><span class="tag theory">Theory • C-402</span></div>
+      </div>
+    </div>
+    <div class="slot" style="animation-delay:0.2s">
+      <div class="time">01:30<br>02:30</div>
+      <div class="card ec">
+        <div class="subj">Environmental Chemistry Lab</div>
+        <div class="teacher">Dr. Sanjay Kumavat (SK)</div>
+        <div class="meta"><span class="tag lab">LAB • CHY</span></div>
+      </div>
+    </div>
+    <div class="slot" style="animation-delay:0.25s">
+      <div class="time">01:30<br>02:30</div>
+      <div class="card bee">
+        <div class="subj">Basic Electrical Engg Lab</div>
+        <div class="teacher">BEE Faculty (EE2)</div>
+        <div class="meta"><span class="tag lab">LAB • A-214(A)</span></div>
+      </div>
+    </div>
+    <div class="slot" style="animation-delay:0.3s">
+      <div class="time">01:30<br>02:30</div>
+      <div class="card cs">
+        <div class="subj">Computer Programming Lab</div>
+        <div class="teacher">Prof. Akshay R. Patil (ARP)</div>
+        <div class="meta"><span class="tag lab">LAB • C-PROG</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TUESDAY ==================== -->
+<div class="day-content" id="tue">
+  <div class="timeline">
+    <div class="slot">
+      <div class="time">09:45<br>10:45</div>
+      <div class="card dld">
+        <div class="subj">Digital Logic Design Lab</div>
+        <div class="teacher">Prof. Ranjit Wagh (RW)</div>
+        <div class="meta"><span class="tag lab">LAB • A-303</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">09:45<br>10:45</div>
+      <div class="card ec">
+        <div class="subj">Environmental Chemistry Lab</div>
+        <div class="teacher">Dr. Sanjay Kumavat (SK)</div>
+        <div class="meta"><span class="tag lab">LAB • CHY</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">09:45<br>10:45</div>
+      <div class="card cp">
+        <div class="subj">Communication Skills Lab</div>
+        <div class="teacher">Prof. Suyash Bonde (SBD)</div>
+        <div class="meta"><span class="tag lab">LAB • C-COM</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">11:45<br>12:45</div>
+      <div class="card dld">
+        <div class="subj">Digital Logic Design</div>
+        <div class="teacher">Prof. Ranjit Wagh (RW)</div>
+        <div class="meta"><span class="tag theory">Theory • C-401</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">01:30<br>02:30</div>
+      <div class="card bee">
+        <div class="subj">Basic Electrical Engineering</div>
+        <div class="teacher">BEE Faculty (EE2)</div>
+        <div class="meta"><span class="tag theory">Theory • C-304</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">02:30<br>03:30</div>
+      <div class="card mdc">
+        <div class="subj">Matrices & Differential Calculus</div>
+        <div class="teacher">Prof. Aabid Khan (AK)</div>
+        <div class="meta"><span class="tag theory">Theory • C-304</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== WEDNESDAY ==================== -->
+<div class="day-content" id="wed">
+  <div class="timeline">
+    <div class="slot">
+      <div class="time">09:45<br>10:45</div>
+      <div class="card bee">
+        <div class="subj">Basic Electrical Engineering</div>
+        <div class="teacher">BEE Faculty (EE2)</div>
+        <div class="meta"><span class="tag theory">Theory • C-303</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">10:45<br>11:45</div>
+      <div class="card mdc">
+        <div class="subj">Matrices & Differential Calculus</div>
+        <div class="teacher">Prof. Aabid Khan (AK)</div>
+        <div class="meta"><span class="tag theory">Theory • C-303</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">11:45<br>12:45</div>
+      <div class="card cs">
+        <div class="subj">Computer Programming</div>
+        <div class="teacher">Prof. Monika Singh (MS)</div>
+        <div class="meta"><span class="tag theory">Theory • C-303</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">01:30<br>02:30</div>
+      <div class="card cs">
+        <div class="subj">Computer Programming Lab</div>
+        <div class="teacher">Prof. Akshay R. Patil (ARP)</div>
+        <div class="meta"><span class="tag lab">LAB • C-PROG</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">01:30<br>02:30</div>
+      <div class="card cp">
+        <div class="subj">Communication Skills Lab</div>
+        <div class="teacher">Prof. Suyash Bonde (SBD)</div>
+        <div class="meta"><span class="tag lab">LAB • C-COM</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">01:30<br>02:30</div>
+      <div class="card ec">
+        <div class="subj">Environmental Chemistry Lab</div>
+        <div class="teacher">Dr. Sanjay Kumavat (SK)</div>
+        <div class="meta"><span class="tag lab">LAB • CHY</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== THURSDAY ==================== -->
+<div class="day-content" id="thu">
+  <div class="timeline">
+    <div class="slot">
+      <div class="time">09:45<br>10:45</div>
+      <div class="card cp">
+        <div class="subj">Communication Skills Lab</div>
+        <div class="teacher">Prof. Suyash Bonde (SBD)</div>
+        <div class="meta"><span class="tag lab">LAB • C-COM</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">09:45<br>10:45</div>
+      <div class="card dld">
+        <div class="subj">Digital Logic Design Lab</div>
+        <div class="teacher">Prof. Ranjit Wagh (RW)</div>
+        <div class="meta"><span class="tag lab">LAB • A-303</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">09:45<br>10:45</div>
+      <div class="card bee">
+        <div class="subj">Basic Electrical Engg Lab</div>
+        <div class="teacher">BEE Faculty (EE2)</div>
+        <div class="meta"><span class="tag lab">LAB • DC Machine</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">11:45<br>12:45</div>
+      <div class="card mdc">
+        <div class="subj">Matrices & Differential Calculus</div>
+        <div class="teacher">Prof. Aabid Khan (AK)</div>
+        <div class="meta"><span class="tag theory">Theory • C-402</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FRIDAY ==================== -->
+<div class="day-content" id="fri">
+  <div class="timeline">
+    <div class="slot">
+      <div class="time">09:45<br>10:45</div>
+      <div class="card dld">
+        <div class="subj">Digital Logic Design</div>
+        <div class="teacher">Prof. Ranjit Wagh (RW)</div>
+        <div class="meta"><span class="tag theory">Theory • C-401</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">10:45<br>11:45</div>
+      <div class="card bee">
+        <div class="subj">Basic Electrical Engineering</div>
+        <div class="teacher">BEE Faculty (EE2)</div>
+        <div class="meta"><span class="tag theory">Theory • C-401</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">11:45<br>12:45</div>
+      <div class="card lib">
+        <div class="subj">Library</div>
+        <div class="teacher">Self Study / Free</div>
+        <div class="meta"><span class="tag">Free Slot</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">01:30<br>02:30</div>
+      <div class="card cp">
+        <div class="subj">Communication Skills</div>
+        <div class="teacher">Prof. Suyash Bonde (SBD)</div>
+        <div class="meta"><span class="tag theory">Theory • C-301</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">02:30<br>03:30</div>
+      <div class="card ec">
+        <div class="subj">Environmental Chemistry</div>
+        <div class="teacher">Dr. Sanjay Kumavat (SK)</div>
+        <div class="meta"><span class="tag theory">Theory • C-301</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">03:30<br>04:30</div>
+      <div class="card bee">
+        <div class="subj">Basic Electrical Engg Lab</div>
+        <div class="teacher">BEE Faculty (EE2)</div>
+        <div class="meta"><span class="tag lab">LAB • A-214(A)</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">03:30<br>04:30</div>
+      <div class="card cs">
+        <div class="subj">Computer Programming Lab</div>
+        <div class="teacher">Prof. Monika Singh (MS)</div>
+        <div class="meta"><span class="tag lab">LAB • C-PROG</span></div>
+      </div>
+    </div>
+    <div class="slot">
+      <div class="time">03:30<br>04:30</div>
+      <div class="card dld">
+        <div class="subj">Digital Logic Design Lab</div>
+        <div class="teacher">Prof. Ranjit Wagh (RW)</div>
+        <div class="meta"><span class="tag lab">LAB • A-303</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <h3>SUBJECT COLOR GUIDE</h3>
+  <div class="leg-item"><div class="dot" style="background:var(--orange)"></div> Matrices & Differential Calculus</div>
+  <div class="leg-item"><div class="dot" style="background:var(--yellow)"></div> Environmental Chemistry</div>
+  <div class="leg-item"><div class="dot" style="background:var(--blue)"></div> Digital Logic Design</div>
+  <div class="leg-item"><div class="dot" style="background:var(--purple)"></div> Basic Electrical Engineering</div>
+  <div class="leg-item"><div class="dot" style="background:var(--cyan)"></div> Computer Programming</div>
+  <div class="leg-item"><div class="dot" style="background:var(--green)"></div> Communication Skills</div>
+</div>
+
+<p class="tip">Tap any day • Smooth animations • Built for mobile</p>
+
+<script>
+  const tabs = document.querySelectorAll('.day-btn');
+  const contents = document.querySelectorAll('.day-content');
+
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabs.forEach(b => b.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.day).classList.add('active');
+
+      // re-trigger animations
+      const slots = document.querySelectorAll(`#${btn.dataset.day} .slot`);
+      slots.forEach((s, i) => {
+        s.style.animation = 'none';
+        s.offsetHeight;
+        s.style.animation = `slideUp 0.45s ease forwards ${i * 0.06}s`;
+      });
+    });
+  });
+</script>
+</body>
+</html>
