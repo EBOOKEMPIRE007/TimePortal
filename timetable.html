@@ -2,742 +2,617 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Cluster-E | CSE (AIML) Timetable</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cluster E · Semester I Timetable</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0c0c10;
-    --card: #16161d;
-    --text: #f2f2f7;
-    --muted: #9ca3af;
-    --accent: #8b5cf6;
-    --orange: #f59e0b;
-    --yellow: #eab308;
-    --blue: #3b82f6;
-    --purple: #a855f7;
-    --cyan: #06b6d4;
-    --green: #10b981;
-    --lunch: #f43f5e;
+  :root{
+    --ink:#12141c;
+    --surface:#1b1e29;
+    --surface-2:#242837;
+    --line: rgba(237,236,230,0.09);
+    --text:#edece6;
+    --text-dim:#9498ac;
+    --text-faint:#666b82;
+    --teal:#5fac9d;
+    --teal-dim: rgba(95,172,157,0.16);
+    --amber:#d9a154;
+    --amber-dim: rgba(217,161,84,0.16);
+    --violet:#9184c9;
+    --violet-dim: rgba(145,132,201,0.16);
+    --rose:#c37b6b;
+    --font-display:'Fraunces', serif;
+    --font-body:'IBM Plex Sans', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  
-  body {
-    font-family: 'Inter', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding-bottom: 50px;
-    overflow-x: hidden;
-  }
-
-  .header {
-    background: linear-gradient(145deg, #16161d, #0f0f14);
-    padding: 22px 18px 14px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 1px solid #252530;
-    backdrop-filter: blur(16px);
-  }
-  .header h1 {
-    font-size: 1.4rem;
-    font-weight: 800;
-    letter-spacing: -0.6px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .header p {
-    font-size: 0.8rem;
-    color: var(--muted);
-    margin-top: 3px;
-  }
-  .badge {
-    background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    color: white;
-    font-size: 0.68rem;
-    font-weight: 700;
-    padding: 4px 11px;
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.35);
-  }
-
-  .days {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding: 16px 16px 8px;
-    scrollbar-width: none;
-  }
-  .days::-webkit-scrollbar { display: none; }
-  
-  .day-btn {
-    flex: 0 0 auto;
-    padding: 11px 20px;
-    border-radius: 40px;
-    background: #1e1e28;
-    color: var(--muted);
-    font-weight: 600;
-    font-size: 0.9rem;
-    border: none;
-    cursor: pointer;
-    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative;
-    overflow: hidden;
-  }
-  .day-btn::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .day-btn.active {
-    color: white;
-    transform: scale(1.08);
-    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.45);
-  }
-  .day-btn.active::after { opacity: 1; }
-  .day-btn span { position: relative; z-index: 1; }
-
-  .timeline { padding: 10px 16px 20px; }
-  
-  .slot {
-    display: flex;
-    gap: 14px;
-    margin-bottom: 16px;
-    opacity: 0;
-    transform: translateY(24px) scale(0.97);
-  }
-  
-  .slot.show {
-    animation: cardIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  }
-  
-  @keyframes cardIn {
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --ink:#f3f1ea;
+      --surface:#ffffff;
+      --surface-2:#f0eee5;
+      --line: rgba(20,20,25,0.09);
+      --text:#1a1c24;
+      --text-dim:#5b5f70;
+      --text-faint:#8c90a0;
+      --teal-dim: rgba(95,172,157,0.14);
+      --amber-dim: rgba(217,161,84,0.18);
+      --violet-dim: rgba(145,132,201,0.14);
     }
   }
-
-  .time {
-    width: 72px;
-    flex-shrink: 0;
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--muted);
-    padding-top: 16px;
-    text-align: right;
-    line-height: 1.3;
+  :root[data-theme="dark"]{
+    --ink:#12141c; --surface:#1b1e29; --surface-2:#242837; --line: rgba(237,236,230,0.09);
+    --text:#edece6; --text-dim:#9498ac; --text-faint:#666b82;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding-bottom:64px;
+  }
+  .wrap{
+    max-width:640px;
+    margin:0 auto;
+    padding:0 18px;
   }
 
-  .card {
-    flex: 1;
-    background: var(--card);
-    border-radius: 20px;
-    padding: 15px 16px;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid #252530;
-    transition: transform 0.25s ease;
+  /* ---------- Header ---------- */
+  header{
+    padding:34px 18px 22px;
+    max-width:640px;
+    margin:0 auto;
+    position:relative;
   }
-  .card:active { transform: scale(0.97); }
-  .card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 5px;
+  .kicker{
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    letter-spacing:0.04em;
+    color:var(--text-faint);
+    display:flex;
+    align-items:center;
+    gap:8px;
   }
-
-  .card.mdc::before { background: var(--orange); }
-  .card.ec::before  { background: var(--yellow); }
-  .card.dld::before { background: var(--blue); }
-  .card.bee::before { background: var(--purple); }
-  .card.cs::before  { background: var(--cyan); }
-  .card.cp::before  { background: var(--green); }
-  .card.lib::before { background: #64748b; }
-  .card.lunch::before { background: var(--lunch); }
-
-  .emoji {
-    font-size: 1.3rem;
-    margin-right: 6px;
-    vertical-align: -2px;
+  .kicker .sep{opacity:0.4;}
+  h1{
+    font-family:var(--font-display);
+    font-weight:500;
+    font-size:clamp(30px, 8vw, 40px);
+    line-height:1.08;
+    margin:10px 0 8px;
+    letter-spacing:-0.01em;
   }
-
-  .subj {
-    font-weight: 700;
-    font-size: 0.95rem;
-    margin-bottom: 5px;
-    line-height: 1.35;
-    display: flex;
-    align-items: center;
+  h1 em{
+    font-style:italic;
+    color:var(--teal);
   }
-  .teacher {
-    font-size: 0.8rem;
-    color: var(--muted);
-    margin-bottom: 8px;
+  .subline{
+    color:var(--text-dim);
+    font-size:14.5px;
+    line-height:1.55;
+    max-width:46ch;
   }
-  .meta {
-    display: flex;
-    gap: 7px;
-    flex-wrap: wrap;
-    align-items: center;
+  .badge-row{
+    display:flex;
+    gap:8px;
+    margin-top:16px;
+    flex-wrap:wrap;
   }
-  
-  .tag {
-    font-size: 0.68rem;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 6px;
-    background: #252530;
-    color: #cbd5e1;
-  }
-  .tag.lab {
-    background: #3b0764;
-    color: #e9d5ff;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-  }
-  .tag.theory {
-    background: #1e3a8a;
-    color: #bfdbfe;
-  }
-  .tag.batch {
-    background: #0f766e;
-    color: #99f6e4;
-    font-weight: 700;
+  .badge{
+    font-family:var(--font-mono);
+    font-size:11px;
+    padding:5px 10px;
+    border:1px solid var(--line);
+    border-radius:100px;
+    color:var(--text-dim);
   }
 
-  .card.lunch {
-    background: linear-gradient(135deg, #1f1215, #16161d);
-    border: 1px solid #4c1d25;
+  /* ---------- Day tabs ---------- */
+  .tabs-outer{
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:linear-gradient(var(--ink) 78%, transparent);
+    padding-top:6px;
   }
-  .card.lunch .subj { color: #fb7185; }
+  .tabs{
+    max-width:640px;
+    margin:0 auto;
+    display:flex;
+    gap:6px;
+    padding:10px 18px 16px;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:14px;
+    padding:9px 16px;
+    border-radius:11px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--text-dim);
+    white-space:nowrap;
+    cursor:pointer;
+    flex:0 0 auto;
+    transition: background .18s ease, color .18s ease, border-color .18s ease;
+  }
+  .tab .full{display:inline;}
+  .tab .today-dot{
+    display:none;
+    width:5px;height:5px;border-radius:50%;
+    background:var(--teal);
+    margin-left:6px;
+  }
+  .tab.is-today .today-dot{display:inline-block;}
+  .tab:hover{color:var(--text);}
+  .tab.active{
+    background:var(--text);
+    color:var(--ink);
+    border-color:var(--text);
+  }
+  .tab.active .today-dot{background:var(--ink);}
 
-  .legend {
-    margin: 8px 16px 30px;
-    background: var(--card);
-    border-radius: 20px;
-    padding: 18px;
-    border: 1px solid #252530;
+  /* ---------- Timeline ---------- */
+  main{padding-top:6px;}
+  .day-panel{display:none;}
+  .day-panel.active{display:block;}
+
+  .timeline{
+    position:relative;
+    padding-left:2px;
   }
-  .legend h3 {
-    font-size: 0.82rem;
-    margin-bottom: 14px;
-    color: var(--muted);
-    letter-spacing: 0.5px;
+  .period{
+    display:grid;
+    grid-template-columns:64px 1fr;
+    gap:12px;
+    padding:0 0 16px;
   }
-  .leg-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
-    font-size: 0.84rem;
+  .period .rail{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding-top:4px;
   }
-  .dot {
-    width: 13px; height: 13px;
-    border-radius: 50%;
-    flex-shrink: 0;
+  .time-col{
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    color:var(--text-faint);
+    line-height:1.4;
+    padding-top:14px;
+  }
+  .time-col .t2{color:var(--text-faint); opacity:0.6;}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width:3px;
+  }
+  .card.lecture::before{background:var(--teal);}
+  .card.lab::before{background:var(--amber);}
+  .card.library::before{background:var(--violet);}
+  .card.free::before{background:transparent;}
+  .card.free{
+    background:transparent;
+    border-style:dashed;
   }
 
-  .day-content { display: none; }
-  .day-content.active { display: block; }
+  .card-top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .subject{
+    font-family:var(--font-display);
+    font-size:18px;
+    font-weight:500;
+    letter-spacing:-0.01em;
+  }
+  .tag{
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:0.02em;
+    padding:3px 8px;
+    border-radius:100px;
+    flex:0 0 auto;
+  }
+  .tag.lecture{background:var(--teal-dim); color:var(--teal);}
+  .tag.lab{background:var(--amber-dim); color:var(--amber);}
+  .tag.library{background:var(--violet-dim); color:var(--violet);}
 
-  .tip {
-    text-align: center;
-    font-size: 0.75rem;
-    color: #555;
-    margin-top: 8px;
+  .meta{
+    margin-top:4px;
+    font-size:13px;
+    color:var(--text-dim);
+  }
+  .meta .dot{margin:0 6px; opacity:0.5;}
+
+  .free-label{
+    font-size:14px;
+    color:var(--text-faint);
+    font-style:italic;
+  }
+  .lib-label{
+    font-size:14px;
+    color:var(--text-dim);
+    margin-top:2px;
+  }
+
+  /* lab batch rows */
+  .batches{
+    margin-top:10px;
+    border-top:1px solid var(--line);
+    padding-top:10px;
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+  }
+  .batch-row{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .batch-id{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    color:var(--ink);
+    background:var(--amber);
+    border-radius:5px;
+    padding:2px 6px;
+    flex:0 0 auto;
+    margin-top:2px;
+    font-weight:600;
+  }
+  .batch-txt .bsub{
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:14px;
+  }
+  .batch-txt .bmeta{
+    font-size:12.5px;
+    color:var(--text-dim);
+    margin-top:1px;
+  }
+  .lab-hint{
+    margin-top:10px;
+    font-size:11.5px;
+    color:var(--text-faint);
+  }
+
+  .lunch{
+    display:grid;
+    grid-template-columns:64px 1fr;
+    gap:12px;
+    padding:2px 0 16px;
+    align-items:center;
+  }
+  .lunch .line{
+    height:1px;
+    background:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 12px);
+  }
+  .lunch .lunch-label{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--text-faint);
+    text-align:center;
+    padding:8px 0;
+  }
+
+  /* ---------- Reference sections ---------- */
+  .ref{
+    margin-top:38px;
+    border-top:1px solid var(--line);
+    padding-top:22px;
+  }
+  .ref h2{
+    font-family:var(--font-display);
+    font-weight:500;
+    font-size:21px;
+    margin:0 0 4px;
+  }
+  .ref .ref-sub{
+    color:var(--text-faint);
+    font-size:13px;
+    margin-bottom:14px;
+  }
+  details{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    margin-bottom:10px;
+    overflow:hidden;
+  }
+  summary{
+    padding:13px 16px;
+    font-weight:600;
+    font-size:14.5px;
+    cursor:pointer;
+    list-style:none;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary::after{
+    content:"+";
+    font-family:var(--font-mono);
+    color:var(--text-faint);
+    font-size:16px;
+  }
+  details[open] summary::after{content:"–";}
+  .detail-body{
+    padding:0 16px 15px;
+    font-size:13.5px;
+    color:var(--text-dim);
+  }
+  .grid-list{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:9px;
+  }
+  .grid-row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding:8px 0;
+    border-bottom:1px solid var(--line);
+    font-size:13.5px;
+  }
+  .grid-row:last-child{border-bottom:none;}
+  .grid-row .k{color:var(--text); font-weight:500;}
+  .grid-row .v{color:var(--text-dim); text-align:right;}
+
+  footer{
+    text-align:center;
+    padding:36px 18px 10px;
+    color:var(--text-faint);
+    font-size:11.5px;
+    font-family:var(--font-mono);
+  }
+
+  @media (max-width:380px){
+    .subject{font-size:16.5px;}
+    .period{grid-template-columns:52px 1fr;}
+    .lunch{grid-template-columns:52px 1fr;}
+    .time-col{font-size:10.5px;}
   }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>Cluster-E <span class="badge">CSE (AIML)</span></h1>
-  <p>Master Timetable • Labs are 2 Hours</p>
-</div>
-
-<div class="days" id="dayTabs">
-  <button class="day-btn active" data-day="mon"><span>Mon</span></button>
-  <button class="day-btn" data-day="tue"><span>Tue</span></button>
-  <button class="day-btn" data-day="wed"><span>Wed</span></button>
-  <button class="day-btn" data-day="thu"><span>Thu</span></button>
-  <button class="day-btn" data-day="fri"><span>Fri</span></button>
-</div>
-
-<!-- ==================== MONDAY ==================== -->
-<div class="day-content active" id="mon">
-  <div class="timeline">
-    <div class="slot">
-      <div class="time">09:45<br>10:45</div>
-      <div class="card dld">
-        <div class="subj"><span class="emoji">💻</span> Digital Logic Design</div>
-        <div class="teacher">Prof. Ranjit Wagh (RW)</div>
-        <div class="meta">
-          <span class="tag theory">THEORY</span>
-          <span class="tag">C-301</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">10:45<br>11:45</div>
-      <div class="card lib">
-        <div class="subj"><span class="emoji">📚</span> Library</div>
-        <div class="teacher">Self Study / Free</div>
-        <div class="meta"><span class="tag">Free Slot</span></div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">11:45<br>12:45</div>
-      <div class="card mdc">
-        <div class="subj"><span class="emoji">📐</span> Matrices & Differential Calculus</div>
-        <div class="teacher">Prof. Aabid Khan (AK)</div>
-        <div class="meta">
-          <span class="tag theory">THEORY</span>
-          <span class="tag">C-402</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="slot">
-      <div class="time">12:45<br>01:30</div>
-      <div class="card lunch">
-        <div class="subj"><span class="emoji">🍱</span> Lunch Break</div>
-        <div class="teacher">Relax & Recharge</div>
-        <div class="meta"><span class="tag">45 mins</span></div>
-      </div>
-    </div>
-
-    <!-- 2-hour Labs -->
-    <div class="slot">
-      <div class="time">01:30<br>03:30</div>
-      <div class="card ec">
-        <div class="subj"><span class="emoji">🧪</span> Environmental Chemistry</div>
-        <div class="teacher">Dr. Sanjay Kumavat (SK)</div>
-        <div class="meta">
-          <span class="tag lab">PRACTICAL</span>
-          <span class="tag batch">BATCH E1</span>
-          <span class="tag">CHY LAB</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">01:30<br>03:30</div>
-      <div class="card bee">
-        <div class="subj"><span class="emoji">⚡</span> Basic Electrical Engineering</div>
-        <div class="teacher">BEE Faculty (EE2)</div>
-        <div class="meta">
-          <span class="tag lab">PRACTICAL</span>
-          <span class="tag batch">BATCH E2</span>
-          <span class="tag">A-214(A)</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">01:30<br>03:30</div>
-      <div class="card cs">
-        <div class="subj"><span class="emoji">🖥️</span> Computer Programming</div>
-        <div class="teacher">Prof. Akshay R. Patil (ARP)</div>
-        <div class="meta">
-          <span class="tag lab">PRACTICAL</span>
-          <span class="tag batch">BATCH E3</span>
-          <span class="tag">C-PROG LAB</span>
-        </div>
-      </div>
-    </div>
+<header>
+  <div class="kicker">G H RAISONI COLLEGE, JALGAON <span class="sep">/</span> B.TECH CSE (AI &amp; ML)</div>
+  <h1>Semester I,<br><em>Cluster E</em> timetable</h1>
+  <div class="subline">Weekday class schedule for lab sub‑batches E1, E2 and E3 — lectures, labs, library slots and free periods, Monday through Friday.</div>
+  <div class="badge-row">
+    <span class="badge">09:45 – 05:30</span>
+    <span class="badge">Lunch 12:45 – 01:30</span>
+    <span class="badge">6 periods · 5 days</span>
   </div>
+</header>
+
+<div class="tabs-outer">
+  <div class="tabs" id="tabs"></div>
 </div>
 
-<!-- ==================== TUESDAY ==================== -->
-<div class="day-content" id="tue">
-  <div class="timeline">
-    <!-- 2-hour Labs -->
-    <div class="slot">
-      <div class="time">09:45<br>11:45</div>
-      <div class="card dld">
-        <div class="subj"><span class="emoji">💻</span> Digital Logic Design</div>
-        <div class="teacher">Prof. Ranjit Wagh (RW)</div>
-        <div class="meta">
-          <span class="tag lab">PRACTICAL</span>
-          <span class="tag batch">BATCH E1</span>
-          <span class="tag">A-303 LAB</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">09:45<br>11:45</div>
-      <div class="card ec">
-        <div class="subj"><span class="emoji">🧪</span> Environmental Chemistry</div>
-        <div class="teacher">Dr. Sanjay Kumavat (SK)</div>
-        <div class="meta">
-          <span class="tag lab">PRACTICAL</span>
-          <span class="tag batch">BATCH E2</span>
-          <span class="tag">CHY LAB</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">09:45<br>11:45</div>
-      <div class="card cp">
-        <div class="subj"><span class="emoji">🗣️</span> Communication Skills</div>
-        <div class="teacher">Prof. Suyash Bonde (SBD)</div>
-        <div class="meta">
-          <span class="tag lab">PRACTICAL</span>
-          <span class="tag batch">BATCH E3</span>
-          <span class="tag">C-COM LAB</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">11:45<br>12:45</div>
-      <div class="card dld">
-        <div class="subj"><span class="emoji">💻</span> Digital Logic Design</div>
-        <div class="teacher">Prof. Ranjit Wagh (RW)</div>
-        <div class="meta">
-          <span class="tag theory">THEORY</span>
-          <span class="tag">C-401</span>
-        </div>
-      </div>
-    </div>
+<main class="wrap">
+  <div id="panels"></div>
+</main>
 
-    <div class="slot">
-      <div class="time">12:45<br>01:30</div>
-      <div class="card lunch">
-        <div class="subj"><span class="emoji">🍱</span> Lunch Break</div>
-        <div class="teacher">Relax & Recharge</div>
-        <div class="meta"><span class="tag">45 mins</span></div>
-      </div>
-    </div>
-
-    <div class="slot">
-      <div class="time">01:30<br>02:30</div>
-      <div class="card bee">
-        <div class="subj"><span class="emoji">⚡</span> Basic Electrical Engineering</div>
-        <div class="teacher">BEE Faculty (EE2)</div>
-        <div class="meta">
-          <span class="tag theory">THEORY</span>
-          <span class="tag">C-304</span>
+<div class="wrap">
+  <section class="ref">
+    <h2>Subjects</h2>
+    <div class="ref-sub">Cluster E · AIML, Semester I</div>
+    <details>
+      <summary>Full subject names</summary>
+      <div class="detail-body">
+        <div class="grid-list">
+          <div class="grid-row"><span class="k">MDC</span><span class="v">Matrices &amp; Differential Calculus</span></div>
+          <div class="grid-row"><span class="k">EC</span><span class="v">Environmental Chemistry</span></div>
+          <div class="grid-row"><span class="k">DLD</span><span class="v">Digital Logic Design</span></div>
+          <div class="grid-row"><span class="k">BEE</span><span class="v">Basic Electrical Engineering</span></div>
+          <div class="grid-row"><span class="k">CP</span><span class="v">Computer Programming</span></div>
+          <div class="grid-row"><span class="k">CS</span><span class="v">Communication Skills</span></div>
+          <div class="grid-row"><span class="k">LLC‑1</span><span class="v">Life Long Competencies – 1</span></div>
         </div>
       </div>
-    </div>
-    <div class="slot">
-      <div class="time">02:30<br>03:30</div>
-      <div class="card mdc">
-        <div class="subj"><span class="emoji">📐</span> Matrices & Differential Calculus</div>
-        <div class="teacher">Prof. Aabid Khan (AK)</div>
-        <div class="meta">
-          <span class="tag theory">THEORY</span>
-          <span class="tag">C-304</span>
-        </div>
+    </details>
+    <details>
+      <summary>Faculty directory</summary>
+      <div class="detail-body">
+        <div class="grid-list" id="facultyList"></div>
       </div>
-    </div>
-  </div>
+    </details>
+    <details>
+      <summary>Reading the labels</summary>
+      <div class="detail-body">
+        A lecture card shows one subject for the whole cluster. A lab card marks three parallel sessions — <strong>E1</strong>, <strong>E2</strong> and <strong>E3</strong> — running at the same time in different rooms; each sub‑batch attends only its own row. Rooms written as a plain number (e.g. C‑304) are classrooms; rooms ending in “LAB” are laboratories.
+      </div>
+    </details>
+  </section>
 </div>
 
-<!-- ==================== WEDNESDAY ==================== -->
-<div class="day-content" id="wed">
-  <div class="timeline">
-    <div class="slot">
-      <div class="time">09:45<br>10:45</div>
-      <div class="card bee">
-        <div class="subj"><span class="emoji">⚡</span> Basic Electrical Engineering</div>
-        <div class="teacher">BEE Faculty (EE2)</div>
-        <div class="meta">
-          <span class="tag theory">THEORY</span>
-          <span class="tag">C-303</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">10:45<br>11:45</div>
-      <div class="card mdc">
-        <div class="subj"><span class="emoji">📐</span> Matrices & Differential Calculus</div>
-        <div class="teacher">Prof. Aabid Khan (AK)</div>
-        <div class="meta">
-          <span class="tag theory">THEORY</span>
-          <span class="tag">C-303</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">11:45<br>12:45</div>
-      <div class="card cs">
-        <div class="subj"><span class="emoji">🖥️</span> Computer Programming</div>
-        <div class="teacher">Prof. Monika Singh (MS)</div>
-        <div class="meta">
-          <span class="tag theory">THEORY</span>
-          <span class="tag">C-303</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="slot">
-      <div class="time">12:45<br>01:30</div>
-      <div class="card lunch">
-        <div class="subj"><span class="emoji">🍱</span> Lunch Break</div>
-        <div class="teacher">Relax & Recharge</div>
-        <div class="meta"><span class="tag">45 mins</span></div>
-      </div>
-    </div>
-
-    <!-- 2-hour Labs -->
-    <div class="slot">
-      <div class="time">01:30<br>03:30</div>
-      <div class="card cs">
-        <div class="subj"><span class="emoji">🖥️</span> Computer Programming</div>
-        <div class="teacher">Prof. Akshay R. Patil (ARP)</div>
-        <div class="meta">
-          <span class="tag lab">PRACTICAL</span>
-          <span class="tag batch">BATCH E1</span>
-          <span class="tag">C-PROG LAB</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">01:30<br>03:30</div>
-      <div class="card cp">
-        <div class="subj"><span class="emoji">🗣️</span> Communication Skills</div>
-        <div class="teacher">Prof. Suyash Bonde (SBD)</div>
-        <div class="meta">
-          <span class="tag lab">PRACTICAL</span>
-          <span class="tag batch">BATCH E2</span>
-          <span class="tag">C-COM LAB</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">01:30<br>03:30</div>
-      <div class="card ec">
-        <div class="subj"><span class="emoji">🧪</span> Environmental Chemistry</div>
-        <div class="teacher">Dr. Sanjay Kumavat (SK)</div>
-        <div class="meta">
-          <span class="tag lab">PRACTICAL</span>
-          <span class="tag batch">BATCH E3</span>
-          <span class="tag">CHY LAB</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ==================== THURSDAY ==================== -->
-<div class="day-content" id="thu">
-  <div class="timeline">
-    <!-- 2-hour Labs -->
-    <div class="slot">
-      <div class="time">09:45<br>11:45</div>
-      <div class="card cp">
-        <div class="subj"><span class="emoji">🗣️</span> Communication Skills</div>
-        <div class="teacher">Prof. Suyash Bonde (SBD)</div>
-        <div class="meta">
-          <span class="tag lab">PRACTICAL</span>
-          <span class="tag batch">BATCH E1</span>
-          <span class="tag">C-COM LAB</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">09:45<br>11:45</div>
-      <div class="card dld">
-        <div class="subj"><span class="emoji">💻</span> Digital Logic Design</div>
-        <div class="teacher">Prof. Ranjit Wagh (RW)</div>
-        <div class="meta">
-          <span class="tag lab">PRACTICAL</span>
-          <span class="tag batch">BATCH E2</span>
-          <span class="tag">A-303 LAB</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">09:45<br>11:45</div>
-      <div class="card bee">
-        <div class="subj"><span class="emoji">⚡</span> Basic Electrical Engineering</div>
-        <div class="teacher">BEE Faculty (EE2)</div>
-        <div class="meta">
-          <span class="tag lab">PRACTICAL</span>
-          <span class="tag batch">BATCH E3</span>
-          <span class="tag">DC MACHINE LAB</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">11:45<br>12:45</div>
-      <div class="card mdc">
-        <div class="subj"><span class="emoji">📐</span> Matrices & Differential Calculus</div>
-        <div class="teacher">Prof. Aabid Khan (AK)</div>
-        <div class="meta">
-          <span class="tag theory">THEORY</span>
-          <span class="tag">C-402</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="slot">
-      <div class="time">12:45<br>01:30</div>
-      <div class="card lunch">
-        <div class="subj"><span class="emoji">🍱</span> Lunch Break</div>
-        <div class="teacher">Relax & Recharge</div>
-        <div class="meta"><span class="tag">45 mins</span></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ==================== FRIDAY ==================== -->
-<div class="day-content" id="fri">
-  <div class="timeline">
-    <div class="slot">
-      <div class="time">09:45<br>10:45</div>
-      <div class="card dld">
-        <div class="subj"><span class="emoji">💻</span> Digital Logic Design</div>
-        <div class="teacher">Prof. Ranjit Wagh (RW)</div>
-        <div class="meta">
-          <span class="tag theory">THEORY</span>
-          <span class="tag">C-401</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">10:45<br>11:45</div>
-      <div class="card bee">
-        <div class="subj"><span class="emoji">⚡</span> Basic Electrical Engineering</div>
-        <div class="teacher">BEE Faculty (EE2)</div>
-        <div class="meta">
-          <span class="tag theory">THEORY</span>
-          <span class="tag">C-401</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">11:45<br>12:45</div>
-      <div class="card lib">
-        <div class="subj"><span class="emoji">📚</span> Library</div>
-        <div class="teacher">Self Study / Free</div>
-        <div class="meta"><span class="tag">Free Slot</span></div>
-      </div>
-    </div>
-
-    <div class="slot">
-      <div class="time">12:45<br>01:30</div>
-      <div class="card lunch">
-        <div class="subj"><span class="emoji">🍱</span> Lunch Break</div>
-        <div class="teacher">Relax & Recharge</div>
-        <div class="meta"><span class="tag">45 mins</span></div>
-      </div>
-    </div>
-
-    <div class="slot">
-      <div class="time">01:30<br>02:30</div>
-      <div class="card cp">
-        <div class="subj"><span class="emoji">🗣️</span> Communication Skills</div>
-        <div class="teacher">Prof. Suyash Bonde (SBD)</div>
-        <div class="meta">
-          <span class="tag theory">THEORY</span>
-          <span class="tag">C-301</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">02:30<br>03:30</div>
-      <div class="card ec">
-        <div class="subj"><span class="emoji">🧪</span> Environmental Chemistry</div>
-        <div class="teacher">Dr. Sanjay Kumavat (SK)</div>
-        <div class="meta">
-          <span class="tag theory">THEORY</span>
-          <span class="tag">C-301</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 2-hour Labs -->
-    <div class="slot">
-      <div class="time">03:30<br>05:30</div>
-      <div class="card bee">
-        <div class="subj"><span class="emoji">⚡</span> Basic Electrical Engineering</div>
-        <div class="teacher">BEE Faculty (EE2)</div>
-        <div class="meta">
-          <span class="tag lab">PRACTICAL</span>
-          <span class="tag batch">BATCH E1</span>
-          <span class="tag">A-214(A)</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">03:30<br>05:30</div>
-      <div class="card cs">
-        <div class="subj"><span class="emoji">🖥️</span> Computer Programming</div>
-        <div class="teacher">Prof. Monika Singh (MS)</div>
-        <div class="meta">
-          <span class="tag lab">PRACTICAL</span>
-          <span class="tag batch">BATCH E2</span>
-          <span class="tag">C-PROG LAB</span>
-        </div>
-      </div>
-    </div>
-    <div class="slot">
-      <div class="time">03:30<br>05:30</div>
-      <div class="card dld">
-        <div class="subj"><span class="emoji">💻</span> Digital Logic Design</div>
-        <div class="teacher">Prof. Ranjit Wagh (RW)</div>
-        <div class="meta">
-          <span class="tag lab">PRACTICAL</span>
-          <span class="tag batch">BATCH E3</span>
-          <span class="tag">A-303 LAB</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Legend -->
-<div class="legend">
-  <h3>SUBJECT COLOR + EMOJI GUIDE</h3>
-  <div class="leg-item"><div class="dot" style="background:var(--orange)"></div> 📐 Matrices & Differential Calculus</div>
-  <div class="leg-item"><div class="dot" style="background:var(--yellow)"></div> 🧪 Environmental Chemistry</div>
-  <div class="leg-item"><div class="dot" style="background:var(--blue)"></div> 💻 Digital Logic Design</div>
-  <div class="leg-item"><div class="dot" style="background:var(--purple)"></div> ⚡ Basic Electrical Engineering</div>
-  <div class="leg-item"><div class="dot" style="background:var(--cyan)"></div> 🖥️ Computer Programming</div>
-  <div class="leg-item"><div class="dot" style="background:var(--green)"></div> 🗣️ Communication Skills</div>
-  <div class="leg-item"><div class="dot" style="background:#64748b"></div> 📚 Library</div>
-  <div class="leg-item"><div class="dot" style="background:var(--lunch)"></div> 🍱 Lunch Break</div>
-</div>
-
-<p class="tip">Labs are now correctly shown as 2-hour Practicals</p>
+<footer>TIMETABLE · CLUSTER E · AIML · SEM I</footer>
 
 <script>
-  const tabs = document.querySelectorAll('.day-btn');
-  const contents = document.querySelectorAll('.day-content');
+const F = {
+  RW:"Prof. Ranjit Wagh", AK:"Prof. Aabid Khan", SK:"Dr. Sanjay Kumavat",
+  ARP:"Prof. Akshay R. Patil", SBD:"Prof. Suyash Bonde", MS:"Prof. Monika Singh",
+  EE2:"Electrical Engg. faculty (EE2)"
+};
 
-  function animateSlots(dayId) {
-    const slots = document.querySelectorAll(`#${dayId} .slot`);
-    slots.forEach((slot, i) => {
-      slot.classList.remove('show');
-      void slot.offsetWidth;
-      setTimeout(() => {
-        slot.classList.add('show');
-        slot.style.animationDelay = `${i * 0.07}s`;
-      }, 20);
-    });
+const S = {
+  MDC:"Matrices &amp; Differential Calculus", EC:"Environmental Chemistry",
+  DLD:"Digital Logic Design", BEE:"Basic Electrical Engineering",
+  CP:"Computer Programming", CS:"Communication Skills"
+};
+
+function lec(code, fac, room){
+  return {type:"lecture", subject:S[code], faculty:F[fac], room};
+}
+function batch(id, code, fac, room){
+  return {id, subject:S[code], faculty:F[fac], room};
+}
+
+const DATA = [
+ { day:"Monday", short:"Mon", periods:[
+    {time:["09:45","10:45"], type:"lecture", data:lec("DLD","RW","C‑301")},
+    {time:["10:45","11:45"], type:"library"},
+    {time:["11:45","12:45"], type:"lecture", data:lec("MDC","AK","C‑402")},
+    "lunch",
+    {time:["01:30","03:30"], type:"lab", batches:[
+        batch("E1","EC","SK","Chemistry Lab"),
+        batch("E2","BEE","EE2","A‑214(A) Lab"),
+        batch("E3","CS","ARP","C‑PROG Lab")
+    ]},
+    {time:["03:30","04:30"], type:"free"},
+    {time:["04:30","05:30"], type:"free"}
+ ]},
+ { day:"Tuesday", short:"Tue", periods:[
+    {time:["09:45","11:45"], type:"lab", batches:[
+        batch("E1","DLD","RW","A‑303 Lab"),
+        batch("E2","EC","SK","Chemistry Lab"),
+        batch("E3","CP","SBD","C‑COM Lab")
+    ]},
+    {time:["11:45","12:45"], type:"lecture", data:lec("DLD","RW","C‑401")},
+    "lunch",
+    {time:["01:30","02:30"], type:"lecture", data:lec("BEE","EE2","C‑304")},
+    {time:["02:30","03:30"], type:"lecture", data:lec("MDC","AK","C‑304")},
+    {time:["03:30","04:30"], type:"free"},
+    {time:["04:30","05:30"], type:"free"}
+ ]},
+ { day:"Wednesday", short:"Wed", periods:[
+    {time:["09:45","10:45"], type:"lecture", data:lec("BEE","EE2","C‑303")},
+    {time:["10:45","11:45"], type:"lecture", data:lec("MDC","AK","C‑303")},
+    {time:["11:45","12:45"], type:"lecture", data:lec("CS","MS","C‑303")},
+    "lunch",
+    {time:["01:30","03:30"], type:"lab", batches:[
+        batch("E1","CS","ARP","C‑PROG Lab"),
+        batch("E2","CP","SBD","C‑COM Lab"),
+        batch("E3","EC","SK","Chemistry Lab")
+    ]},
+    {time:["03:30","04:30"], type:"free"},
+    {time:["04:30","05:30"], type:"free"}
+ ]},
+ { day:"Thursday", short:"Thu", periods:[
+    {time:["09:45","11:45"], type:"lab", batches:[
+        batch("E1","CP","SBD","C‑COM Lab"),
+        batch("E2","DLD","RW","A‑303 Lab"),
+        batch("E3","BEE","EE2","DC Machine Lab")
+    ]},
+    {time:["11:45","12:45"], type:"lecture", data:lec("MDC","AK","C‑402")},
+    "lunch",
+    {time:["01:30","02:30"], type:"free"},
+    {time:["02:30","03:30"], type:"free"},
+    {time:["03:30","04:30"], type:"free"},
+    {time:["04:30","05:30"], type:"free"}
+ ]},
+ { day:"Friday", short:"Fri", periods:[
+    {time:["09:45","10:45"], type:"lecture", data:lec("DLD","RW","C‑401")},
+    {time:["10:45","11:45"], type:"lecture", data:lec("BEE","EE2","C‑401")},
+    {time:["11:45","12:45"], type:"library"},
+    "lunch",
+    {time:["01:30","02:30"], type:"lecture", data:lec("CP","SBD","C‑301")},
+    {time:["02:30","03:30"], type:"lecture", data:lec("EC","SK","C‑301")},
+    {time:["03:30","05:30"], type:"lab", batches:[
+        batch("E1","BEE","EE2","A‑214(A) Lab"),
+        batch("E2","CS","MS","C‑PROG Lab"),
+        batch("E3","DLD","RW","A‑303 Lab")
+    ]}
+ ]}
+];
+
+function periodHTML(p){
+  if(p === "lunch"){
+    return `<div class="lunch"><div></div><div><div class="line"></div><div class="lunch-label">LUNCH · 12:45 – 01:30</div><div class="line"></div></div></div>`;
   }
+  const [t1,t2] = p.time;
+  let body = "";
+  if(p.type === "free"){
+    body = `<div class="card free"><div class="free-label">No class — free period</div></div>`;
+  } else if(p.type === "library"){
+    body = `<div class="card library">
+      <div class="card-top"><div class="subject">Library</div><span class="tag library">SELF‑STUDY</span></div>
+      <div class="lib-label">Reading / reference slot</div>
+    </div>`;
+  } else if(p.type === "lecture"){
+    const d = p.data;
+    body = `<div class="card lecture">
+      <div class="card-top"><div class="subject">${d.subject}</div><span class="tag lecture">LECTURE</span></div>
+      <div class="meta">${d.faculty}<span class="dot">&middot;</span>${d.room}</div>
+    </div>`;
+  } else if(p.type === "lab"){
+    const rows = p.batches.map(b => `
+      <div class="batch-row">
+        <span class="batch-id">${b.id}</span>
+        <div class="batch-txt">
+          <div class="bsub">${b.subject}</div>
+          <div class="bmeta">${b.faculty} &middot; ${b.room}</div>
+        </div>
+      </div>`).join("");
+    body = `<div class="card lab">
+      <div class="card-top"><div class="subject">Lab session</div><span class="tag lab">LAB · 3 BATCHES</span></div>
+      <div class="batches">${rows}</div>
+      <div class="lab-hint">Attend only your own sub‑batch row.</div>
+    </div>`;
+  }
+  return `<div class="period">
+    <div class="rail"><div class="time-col">${t1}<br><span class="t2">${t2}</span></div></div>
+    ${body}
+  </div>`;
+}
 
-  animateSlots('mon');
+const tabsEl = document.getElementById("tabs");
+const panelsEl = document.getElementById("panels");
 
-  tabs.forEach(btn => {
-    btn.addEventListener('click', () => {
-      tabs.forEach(b => b.classList.remove('active'));
-      contents.forEach(c => c.classList.remove('active'));
+const jsWeekday = new Date().getDay(); // 0 Sun .. 6 Sat
+const todayIndex = [null,0,1,2,3,4,null][jsWeekday]; // map Mon=0..Fri=4
+let activeIndex = todayIndex !== null && todayIndex !== undefined ? todayIndex : 0;
+if(activeIndex === null || activeIndex === undefined) activeIndex = 0;
 
-      btn.classList.add('active');
-      const day = btn.dataset.day;
-      document.getElementById(day).classList.add('active');
-      animateSlots(day);
-    });
-  });
+DATA.forEach((d, i) => {
+  const tab = document.createElement("button");
+  tab.className = "tab" + (i === activeIndex ? " active" : "") + (i === todayIndex ? " is-today" : "");
+  tab.innerHTML = `<span class="full">${d.day}</span><span class="today-dot"></span>`;
+  tab.addEventListener("click", () => setActive(i));
+  tabsEl.appendChild(tab);
+
+  const panel = document.createElement("div");
+  panel.className = "day-panel" + (i === activeIndex ? " active" : "");
+  panel.id = "panel-" + i;
+  const tl = document.createElement("div");
+  tl.className = "timeline";
+  tl.innerHTML = d.periods.map(periodHTML).join("");
+  panel.appendChild(tl);
+  panelsEl.appendChild(panel);
+});
+
+function setActive(i){
+  document.querySelectorAll(".tab").forEach((t, idx) => t.classList.toggle("active", idx === i));
+  document.querySelectorAll(".day-panel").forEach((p, idx) => p.classList.toggle("active", idx === i));
+}
+
+const facultyEl = document.getElementById("facultyList");
+facultyEl.innerHTML = Object.entries(F).map(([code,name]) =>
+  `<div class="grid-row"><span class="k">${code}</span><span class="v">${name}</span></div>`
+).join("");
 </script>
+
 </body>
 </html>
